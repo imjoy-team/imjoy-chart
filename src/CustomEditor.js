@@ -211,7 +211,9 @@ export default class CustomEditor extends DefaultEditor {
             variant="primary"
             label="save"
             onClick={async () => {
-              exportChart("full-json");
+              if (this.props.handleSaveData)
+                this.props.handleLoadData(this.props.data);
+              else exportChart("full-json");
             }}
           />
         </SingleSidebarItem>

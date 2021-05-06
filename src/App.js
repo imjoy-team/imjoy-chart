@@ -54,8 +54,8 @@ class App extends Component {
   constructor() {
     super();
     let load = getUrlParameter("load");
+    this.saveDataHandler = null;
     if (load) {
-      this.showDataPanel = false;
       loadCSV(load).then((data) => {
         this.dataSources = data;
         this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
@@ -65,7 +65,6 @@ class App extends Component {
         this.forceUpdate();
       });
     } else {
-      this.showDataPanel = true;
       this.dataSources = {
         col1: [1, 2, 3], // eslint-disable-line no-magic-numbers
         col2: [4, 3, 2], // eslint-disable-line no-magic-numbers
@@ -92,7 +91,7 @@ class App extends Component {
           },
           run(ctx) {
             if (ctx && ctx.config) {
-              self.showDataPanel = ctx.config.showDataPanel;
+              self.saveDataHandler = ctx.config.saveDataHandler;
             }
             if (ctx && ctx.data) {
               self.setState(ctx.data);
@@ -189,7 +188,7 @@ class App extends Component {
             dataSources={this.dataSources}
             divId={plotDivId}
             data={this.state}
-            showDataPanel={this.showDataPanel}
+            handleSaveData={this.saveDataHandler}
             handleLoadData={this.loadData.bind(this)}
           />
         </PlotlyEditor>
