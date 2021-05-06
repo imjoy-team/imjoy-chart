@@ -55,6 +55,7 @@ class App extends Component {
     super();
     let load = getUrlParameter("load");
     if (load) {
+      this.showDataPanel = false;
       loadCSV(load).then((data) => {
         this.dataSources = data;
         this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
@@ -64,6 +65,7 @@ class App extends Component {
         this.forceUpdate();
       });
     } else {
+      this.showDataPanel = true;
       this.dataSources = {
         col1: [1, 2, 3], // eslint-disable-line no-magic-numbers
         col2: [4, 3, 2], // eslint-disable-line no-magic-numbers
@@ -89,12 +91,11 @@ class App extends Component {
             console.log("imjoy-rpc initialized.");
           },
           run(ctx) {
+            if (ctx && ctx.config) {
+              self.showDataPanel = ctx.config.showDataPanel;
+            }
             if (ctx && ctx.data) {
-              self.state = ctx.data || {
-                data: [],
-                layout: {},
-                frames: [],
-              };
+              self.setState(ctx.data);
               self.dataSources = ctx.data.dataSources || {};
               self.dataSourceOptions =
                 ctx.data.dataSourceOptions ||
@@ -109,7 +110,7 @@ class App extends Component {
             self.forceUpdate();
           },
           setState(state) {
-            self.state = state;
+            self.setState(state);
             self.forceUpdate();
           },
           getState() {
@@ -126,7 +127,7 @@ class App extends Component {
         const response = await fetch(file);
         const data = await response.json();
         if (data.data && data.layout) {
-          this.state = data;
+          this.setState(data);
           this.forceUpdate();
         } else {
           throw new Error("Invalid file type");
@@ -142,7 +143,7 @@ class App extends Component {
         fr.addEventListener("load", (e) => {
           const data = JSON.parse(fr.result);
           if (data.data && data.layout) {
-            this.state = data;
+            this.setState(data);
             this.forceUpdate();
           } else {
             throw new Error("Invalid file type");
@@ -188,6 +189,7 @@ class App extends Component {
             dataSources={this.dataSources}
             divId={plotDivId}
             data={this.state}
+            showDataPanel={this.showDataPanel}
             handleLoadData={this.loadData.bind(this)}
           />
         </PlotlyEditor>

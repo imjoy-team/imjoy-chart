@@ -101,35 +101,37 @@ export default class CustomEditor extends DefaultEditor {
     return (
       <PanelMenuWrapper menuPanelOrder={this.props.menuPanelOrder}>
         {logo ? logo : null}
-        <LayoutPanel group={_("Data")} name={_("Import")}>
-          <Field>
-            <Drop
-              onDrop={onDrop}
-              activeClassName="dropzone-container--active"
-              rejectClassName="dropzone-container--rejected"
-            >
-              {({ getRootProps, getInputProps }) => (
-                <div {...getRootProps()} className="dropzone-container">
-                  <input {...getInputProps()} />
-                  <div className="dropzone-container__content">
-                    {this.state.content}
+        {this.props.showDataPanel && (
+          <LayoutPanel group={_("Data")} name={_("Import")}>
+            <Field>
+              <Drop
+                onDrop={onDrop}
+                activeClassName="dropzone-container--active"
+                rejectClassName="dropzone-container--rejected"
+              >
+                {({ getRootProps, getInputProps }) => (
+                  <div {...getRootProps()} className="dropzone-container">
+                    <input {...getInputProps()} />
+                    <div className="dropzone-container__content">
+                      {this.state.content}
+                    </div>
                   </div>
-                </div>
-              )}
-            </Drop>
-          </Field>
+                )}
+              </Drop>
+            </Field>
 
-          <Button
-            variant="primary"
-            label="Load from URL"
-            onClick={() => {
-              const url = prompt("Data URL");
-              if (url) {
-                this.props.handleLoadData(url);
-              }
-            }}
-          />
-        </LayoutPanel>
+            <Button
+              variant="primary"
+              label="Load from URL"
+              onClick={() => {
+                const url = prompt("Data URL");
+                if (url) {
+                  this.props.handleLoadData(url);
+                }
+              }}
+            />
+          </LayoutPanel>
+        )}
         <GraphCreatePanel group={_("Structure")} name={_("Traces")} />
         <GraphSubplotsPanel group={_("Structure")} name={_("Subplots")} />
         {this.hasTransforms() && (
@@ -210,7 +212,7 @@ export default class CustomEditor extends DefaultEditor {
             onClick={async () => {
               const base64 =
                 "data:application/json;charset=utf-8," +
-                JSON.stringify(this.props.data);
+                encodeURIComponent(JSON.stringify(this.props.data));
               download("imjoy_chart_editor_export.json", base64);
             }}
           />
