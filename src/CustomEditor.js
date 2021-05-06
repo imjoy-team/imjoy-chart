@@ -184,7 +184,13 @@ export default class CustomEditor extends DefaultEditor {
             </Field>
 
             <Field>
-              <Button variant="primary" label="Export" onClick={exportChart} />
+              <Button
+                variant="primary"
+                label="Export"
+                onClick={() => {
+                  exportChart();
+                }}
+              />
             </Field>
           </PlotlyFold>
         </LayoutPanel>
