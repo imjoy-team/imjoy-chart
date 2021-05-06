@@ -131,6 +131,8 @@ class App extends Component {
           onUpdate={(data, layout, frames) => this.setState({data, layout, frames})}
           useResizeHandler
           debug
+          glByDefault
+          showFieldTooltips
           advancedTraceTypeSelector
         >
           <CustomEditor 
