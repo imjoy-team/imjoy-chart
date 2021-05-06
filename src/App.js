@@ -88,8 +88,12 @@ class App extends Component {
           },
           run(ctx){
             if(ctx && ctx.data){
-              self.state = ctx.data;
-              self.dataSources = ctx.data.data_sources;
+              self.state = ctx.data || {
+                data: [],
+                layout: {},
+                frames: []
+              };
+              self.dataSources = ctx.data.data_sources || {};
               self.dataSourceOptions = ctx.data.data_sources_options || Object.keys(self.dataSources).map(name => ({
                 value: name,
                 label: name,
