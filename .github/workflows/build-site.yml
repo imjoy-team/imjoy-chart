@@ -26,6 +26,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run build
+      env:
+        PUBLIC_URL: /imjoy-chart-editor 
     - name: Save build output
       uses: actions/upload-artifact@v1
       with:
