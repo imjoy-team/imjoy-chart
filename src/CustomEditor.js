@@ -185,7 +185,7 @@ export default class CustomEditor extends DefaultEditor {
                   height: 2048,
                   width: 2048,
                 });
-                download("export.png", base64);
+                download("imjoy_chart_editor_export.png", base64);
               }}
             />
             <Button
@@ -197,22 +197,24 @@ export default class CustomEditor extends DefaultEditor {
                   height: 1024,
                   width: 1024,
                 });
-                download("export.svg", base64);
+                download("imjoy_chart_editor_export.svg", base64);
               }}
             />
           </SingleSidebarItem>
         </LayoutPanel>
-        {this.props.saveCallback && (
-          <SingleSidebarItem>
-            <Button
-              variant="primary"
-              label="save"
-              onClick={async () => {
-                console.log(this.props.data);
-              }}
-            />
-          </SingleSidebarItem>
-        )}
+
+        <SingleSidebarItem>
+          <Button
+            variant="primary"
+            label="save"
+            onClick={async () => {
+              const base64 =
+                "data:application/json;charset=utf-8," +
+                JSON.stringify(this.props.data);
+              download("imjoy_chart_editor_export.json", base64);
+            }}
+          />
+        </SingleSidebarItem>
       </PanelMenuWrapper>
     );
   }

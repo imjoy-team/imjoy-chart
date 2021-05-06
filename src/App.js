@@ -95,16 +95,16 @@ class App extends Component {
                 layout: {},
                 frames: [],
               };
-              self.dataSources = ctx.data.data_sources || {};
+              self.dataSources = ctx.data.dataSources || {};
               self.dataSourceOptions =
-                ctx.data.data_sources_options ||
+                ctx.data.dataSourceOptions ||
                 Object.keys(self.dataSources).map((name) => ({
                   value: name,
                   label: name,
                 }));
-              if (self.state.data_sources) delete self.data.data_sources;
-              if (self.state.data_sources_options)
-                delete self.data.data_sources_options;
+              if (self.state.dataSources) delete self.data.dataSources;
+              if (self.state.dataSourceOptions)
+                delete self.data.dataSourceOptions;
             }
             self.forceUpdate();
           },
@@ -121,6 +121,37 @@ class App extends Component {
   }
 
   async loadData(file) {
+    if (typeof file === "string") {
+      if (file.split("?")[0].endsWith(".json")) {
+        const response = await fetch(file);
+        const data = await response.json();
+        if (data.data && data.layout) {
+          this.state = data;
+          this.forceUpdate();
+        } else {
+          throw new Error("Invalid file type");
+        }
+      } else if (!file.split("?")[0].endsWith(".csv")) {
+        throw new Error(
+          "Invalid file extension, only .json and .csv are supported"
+        );
+      }
+    } else if (file instanceof Blob) {
+      if (file.name.endsWith(".json")) {
+        const fr = new FileReader();
+        fr.addEventListener("load", (e) => {
+          const data = JSON.parse(fr.result);
+          if (data.data && data.layout) {
+            this.state = data;
+            this.forceUpdate();
+          } else {
+            throw new Error("Invalid file type");
+          }
+        });
+
+        fr.readAsText(file);
+      }
+    }
     const data = await loadCSV(file);
     this.dataSources = data;
     this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
