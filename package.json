@@ -2,6 +2,7 @@
   "name": "imjoy-chart-editor",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/imjoy-chart-editor/",
   "dependencies": {
     "fsevents": "^2.3.2",
     "imjoy-rpc": "^0.3.7",
