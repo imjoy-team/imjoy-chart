@@ -1,23 +1,23 @@
 {
   "files": {
     "main.css": "/imjoy-chart-editor/static/css/main.10ede969.chunk.css",
-    "main.js": "/imjoy-chart-editor/static/js/main.35c136a5.chunk.js",
-    "main.js.map": "/imjoy-chart-editor/static/js/main.35c136a5.chunk.js.map",
+    "main.js": "/imjoy-chart-editor/static/js/main.bd55f679.chunk.js",
+    "main.js.map": "/imjoy-chart-editor/static/js/main.bd55f679.chunk.js.map",
     "runtime-main.js": "/imjoy-chart-editor/static/js/runtime-main.7df928fc.js",
     "runtime-main.js.map": "/imjoy-chart-editor/static/js/runtime-main.7df928fc.js.map",
     "static/css/2.15a4e0ea.chunk.css": "/imjoy-chart-editor/static/css/2.15a4e0ea.chunk.css",
-    "static/js/2.8a3cf3d3.chunk.js": "/imjoy-chart-editor/static/js/2.8a3cf3d3.chunk.js",
-    "static/js/2.8a3cf3d3.chunk.js.map": "/imjoy-chart-editor/static/js/2.8a3cf3d3.chunk.js.map",
+    "static/js/2.955355f2.chunk.js": "/imjoy-chart-editor/static/js/2.955355f2.chunk.js",
+    "static/js/2.955355f2.chunk.js.map": "/imjoy-chart-editor/static/js/2.955355f2.chunk.js.map",
     "index.html": "/imjoy-chart-editor/index.html",
     "static/css/2.15a4e0ea.chunk.css.map": "/imjoy-chart-editor/static/css/2.15a4e0ea.chunk.css.map",
     "static/css/main.10ede969.chunk.css.map": "/imjoy-chart-editor/static/css/main.10ede969.chunk.css.map",
-    "static/js/2.8a3cf3d3.chunk.js.LICENSE.txt": "/imjoy-chart-editor/static/js/2.8a3cf3d3.chunk.js.LICENSE.txt"
+    "static/js/2.955355f2.chunk.js.LICENSE.txt": "/imjoy-chart-editor/static/js/2.955355f2.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.7df928fc.js",
     "static/css/2.15a4e0ea.chunk.css",
-    "static/js/2.8a3cf3d3.chunk.js",
+    "static/js/2.955355f2.chunk.js",
     "static/css/main.10ede969.chunk.css",
-    "static/js/main.35c136a5.chunk.js"
+    "static/js/main.bd55f679.chunk.js"
   ]
 }
