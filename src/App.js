@@ -1,41 +1,44 @@
-import React, {Component} from 'react';
-import plotly from 'plotly.js/dist/plotly';
-import PlotlyEditor from 'react-chart-editor';
-import CustomEditor from './CustomEditor';
-import 'react-chart-editor/lib/react-chart-editor.css';
-import { imjoyRPC } from 'imjoy-rpc';
-import * as Papa from 'papaparse';
+import React, { Component } from "react";
+import plotly from "plotly.js/dist/plotly";
+import PlotlyEditor from "react-chart-editor";
+import CustomEditor from "./CustomEditor";
+import "react-chart-editor/lib/react-chart-editor.css";
+import { imjoyRPC } from "imjoy-rpc";
+import * as Papa from "papaparse";
 
-const config = {editable: true};
+const config = { editable: true };
 
-function loadCSV(url){
-  return new Promise((resolve, reject)=>{
+function loadCSV(url) {
+  return new Promise((resolve, reject) => {
     Papa.parse(url, {
       download: true,
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
-      error: (err, file, inputElem, reason)=> {
-          alert('Falied to load the table: ' + reason.toString())
-          reject(reason)
+      error: (err, file, inputElem, reason) => {
+        alert("Falied to load the table: " + reason.toString());
+        reject(reason);
       },
       complete: (results) => {
-        resolve(transpose(results.data))
-      }
-  })
-  })
-  
+        resolve(transpose(results.data));
+      },
+    });
+  });
 }
 
 function transpose(data) {
   let result = {};
   for (let row of data) {
     for (let [key, value] of Object.entries(row)) {
-        result[key] = result[key] || [];
-        result[key].push(value); 
+      result[key] = result[key] || [];
+      result[key].push(value);
     }
   }
   return result;
+}
+
+function randId() {
+  return "_" + Math.random().toString(36).substr(2, 9);
 }
 
 function getUrlParameter(name) {
@@ -50,25 +53,24 @@ function getUrlParameter(name) {
 class App extends Component {
   constructor() {
     super();
-    let load = getUrlParameter('load');
-    if(load){
-      loadCSV(load).then((data)=>{
-        this.dataSources = data
-        this.dataSourceOptions = Object.keys(this.dataSources).map(name => ({
+    let load = getUrlParameter("load");
+    if (load) {
+      loadCSV(load).then((data) => {
+        this.dataSources = data;
+        this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
           value: name,
           label: name,
         }));
-        this.forceUpdate()
-      })
-    }
-    else {
+        this.forceUpdate();
+      });
+    } else {
       this.dataSources = {
         col1: [1, 2, 3], // eslint-disable-line no-magic-numbers
         col2: [4, 3, 2], // eslint-disable-line no-magic-numbers
         col3: [17, 13, 9], // eslint-disable-line no-magic-numbers
       };
-  
-      this.dataSourceOptions = Object.keys(this.dataSources).map(name => ({
+
+      this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
         value: name,
         label: name,
       }));
@@ -81,43 +83,55 @@ class App extends Component {
     // if inside an iframe, setup imjoy rpc
     if (window.self !== window.top) {
       const self = this;
-      imjoyRPC.setupRPC({name: 'ImJoy Chart Editor'}).then((api)=>{
+      imjoyRPC.setupRPC({ name: "ImJoy Chart Editor" }).then((api) => {
         api.export({
-          setup(){
-            console.log("imjoy-rpc initialized.")
+          setup() {
+            console.log("imjoy-rpc initialized.");
           },
-          run(ctx){
-            if(ctx && ctx.data){
+          run(ctx) {
+            if (ctx && ctx.data) {
               self.state = ctx.data || {
                 data: [],
                 layout: {},
-                frames: []
+                frames: [],
               };
               self.dataSources = ctx.data.data_sources || {};
-              self.dataSourceOptions = ctx.data.data_sources_options || Object.keys(self.dataSources).map(name => ({
-                value: name,
-                label: name,
-              }));
-              if(self.state.data_sources)
-                delete self.data.data_sources;
-              if(self.state.data_sources_options)
+              self.dataSourceOptions =
+                ctx.data.data_sources_options ||
+                Object.keys(self.dataSources).map((name) => ({
+                  value: name,
+                  label: name,
+                }));
+              if (self.state.data_sources) delete self.data.data_sources;
+              if (self.state.data_sources_options)
                 delete self.data.data_sources_options;
             }
             self.forceUpdate();
           },
-          setState(state){
+          setState(state) {
             self.state = state;
             self.forceUpdate();
           },
-          getState(){
+          getState() {
             return self.state;
-          }
-        })
-      })
+          },
+        });
+      });
     }
   }
 
+  async loadData(file) {
+    const data = await loadCSV(file);
+    this.dataSources = data;
+    this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
+      value: name,
+      label: name,
+    }));
+    this.forceUpdate();
+  }
+
   render() {
+    const plotDivId = randId();
     return (
       <div className="app">
         <PlotlyEditor
@@ -128,18 +142,22 @@ class App extends Component {
           dataSources={this.dataSources}
           dataSourceOptions={this.dataSourceOptions}
           plotly={plotly}
-          onUpdate={(data, layout, frames) => this.setState({data, layout, frames})}
+          onUpdate={(data, layout, frames) =>
+            this.setState({ data, layout, frames })
+          }
           useResizeHandler
           debug
           glByDefault
           showFieldTooltips
           advancedTraceTypeSelector
+          divId={plotDivId}
         >
-          <CustomEditor 
+          <CustomEditor
             logoSrc={"./static/icons/favicon-96x96.png"}
-            saveCallback={()=>{
-              console.log('saving...',this.state)
-            }}
+            dataSources={this.dataSources}
+            divId={plotDivId}
+            data={this.state}
+            handleLoadData={this.loadData.bind(this)}
           />
         </PlotlyEditor>
       </div>
