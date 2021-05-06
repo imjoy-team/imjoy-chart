@@ -1,6 +1,6 @@
 {
   "name": "imjoy-chart-editor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "homepage": ".",
   "dependencies": {
@@ -14,7 +14,7 @@
     "react-scripts": "4.0.3"
   },
   "scripts": {
-    "lint": "prettier --write \"src/**/*.js\"",
+    "format": "prettier --write \"src/**/*.js\"",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",

@@ -23,11 +23,11 @@ import {
   StyleColorbarsPanel,
   StyleUpdateMenusPanel,
 } from "react-chart-editor";
-
-import Logo from "react-chart-editor/lib/components/widgets/Logo";
-import Drop from "react-dropzone";
-
 import Field from "react-chart-editor/lib/components/fields/Field";
+import Logo from "react-chart-editor/lib/components/widgets/Logo";
+import NumericInput from "react-chart-editor/lib/components/widgets/NumericInput";
+import DropdownWidget from "react-chart-editor/lib/components/widgets/Dropdown";
+import TextInput from "react-chart-editor/lib/components/widgets/TextInput";
 
 function download(filename, base64) {
   var element = document.createElement("a");
@@ -42,44 +42,13 @@ function download(filename, base64) {
   document.body.removeChild(element);
 }
 export default class CustomEditor extends DefaultEditor {
-  constructor(props, context) {
-    super(props, context);
-
-    this.state = {
-      content:
-        "Drop a file to upload here or click to choose a file from your computer.",
-    };
-  }
-
-  async onDrop(accepted, rejected) {
-    const _ = this.context.localize;
-    if (accepted.length) {
-      if (accepted.length > 1) {
-        this.setState({
-          content: (
-            <div className="dropzone-container__message">
-              <p>{_("Yikes! You can only upload one file at a time.")}</p>
-            </div>
-          ),
-        });
-        return;
-      }
-
-      try {
-        this.setState({ content: _("Loading...") });
-        await this.props.handleLoadData(accepted[0]);
-      } catch (e) {
-        throw e;
-      } finally {
-        this.setState({ content: _("File loaded.") });
-      }
-    }
-
-    if (rejected.length) {
-      this.setState({
-        content: "Failed to load file",
-      });
-    }
+  constructor(props) {
+    super(props);
+    this.inputFile = React.createRef();
+    this.exportWidth = 1024;
+    this.exportHeight = 1024;
+    this.exportFormat = "png";
+    this.exportFileName = "imjoy-chart-export";
   }
 
   render() {
@@ -96,42 +65,21 @@ export default class CustomEditor extends DefaultEditor {
         );
       }
     }
-
-    const onDrop = this.onDrop.bind(this);
+    const exportChart = async (format) => {
+      format = format || this.exportFormat;
+      const base64 = await plotly.toImage(this.props.divId, {
+        format: format,
+        height: this.exportHeight,
+        width: this.exportWidth,
+      });
+      download(
+        this.exportFileName + "." + format.replace("full-json", "json"),
+        base64
+      );
+    };
     return (
       <PanelMenuWrapper menuPanelOrder={this.props.menuPanelOrder}>
         {logo ? logo : null}
-        {this.props.showDataPanel && (
-          <LayoutPanel group={_("Data")} name={_("Import")}>
-            <Field>
-              <Drop
-                onDrop={onDrop}
-                activeClassName="dropzone-container--active"
-                rejectClassName="dropzone-container--rejected"
-              >
-                {({ getRootProps, getInputProps }) => (
-                  <div {...getRootProps()} className="dropzone-container">
-                    <input {...getInputProps()} />
-                    <div className="dropzone-container__content">
-                      {this.state.content}
-                    </div>
-                  </div>
-                )}
-              </Drop>
-            </Field>
-
-            <Button
-              variant="primary"
-              label="Load from URL"
-              onClick={() => {
-                const url = prompt("Data URL");
-                if (url) {
-                  this.props.handleLoadData(url);
-                }
-              }}
-            />
-          </LayoutPanel>
-        )}
         <GraphCreatePanel group={_("Structure")} name={_("Traces")} />
         <GraphSubplotsPanel group={_("Structure")} name={_("Subplots")} />
         {this.hasTransforms() && (
@@ -177,43 +125,93 @@ export default class CustomEditor extends DefaultEditor {
           </PlotlyFold>
         </LayoutPanel>
         <LayoutPanel group={_("Export")} name="image">
-          <SingleSidebarItem>
-            <Button
-              variant="primary"
-              label="Export PNG"
-              onClick={async () => {
-                const base64 = await plotly.toImage(this.props.divId, {
-                  format: "png",
-                  height: 2048,
-                  width: 2048,
-                });
-                download("imjoy_chart_editor_export.png", base64);
-              }}
-            />
-            <Button
-              variant="primary"
-              label="Export SVG"
-              onClick={async () => {
-                const base64 = await plotly.toImage(this.props.divId, {
-                  format: "svg",
-                  height: 1024,
-                  width: 1024,
-                });
-                download("imjoy_chart_editor_export.svg", base64);
-              }}
-            />
-          </SingleSidebarItem>
+          <PlotlyFold>
+            <Field label="Width">
+              <NumericInput
+                value={this.exportWidth}
+                onChange={(v) => {
+                  this.exportWidth = v;
+                  this.forceUpdate();
+                }}
+                onUpdate={(v) => {
+                  this.exportWidth = v;
+                  this.forceUpdate();
+                }}
+                units="px"
+              />
+            </Field>
+            <Field label="Height">
+              <NumericInput
+                value={this.exportHeight}
+                onChange={(v) => {
+                  this.exportHeight = v;
+                  this.forceUpdate();
+                }}
+                onUpdate={(v) => {
+                  this.exportHeight = v;
+                  this.forceUpdate();
+                }}
+                units="px"
+              />
+            </Field>
+
+            <Field label="Format">
+              <DropdownWidget
+                options={[
+                  { label: "PNG", value: "png" },
+                  { label: "JPEG", value: "jpeg" },
+                  { label: "WEBP", value: "webp" },
+                  { label: "SVG", value: "svg" },
+                  { label: "JSON", value: "full-json" },
+                ]}
+                value={this.exportFormat}
+                onChange={(v) => {
+                  this.exportFormat = v;
+                  this.forceUpdate();
+                }}
+                clearable={false}
+              />
+            </Field>
+            <Field label="File Name">
+              <TextInput
+                value={this.exportFileName}
+                defaultValue={this.exportFileName}
+                onUpdate={(v) => {
+                  this.exportFileName = v;
+                  this.forceUpdate();
+                }}
+              />
+            </Field>
+
+            <Field>
+              <Button variant="primary" label="Export" onClick={exportChart} />
+            </Field>
+          </PlotlyFold>
         </LayoutPanel>
+        <SingleSidebarItem>
+          <input
+            type="file"
+            onChange={(e) => {
+              this.props.handleLoadData(e.target.files[0]);
+            }}
+            ref={this.inputFile}
+            style={{ display: "none" }}
+          />
+          <Button
+            variant="primary"
+            label="Load"
+            onClick={() => {
+              this.inputFile.current.click();
+            }}
+          />
+        </SingleSidebarItem>
 
         <SingleSidebarItem>
           <Button
             variant="primary"
             label="save"
             onClick={async () => {
-              const base64 =
-                "data:application/json;charset=utf-8," +
-                encodeURIComponent(JSON.stringify(this.props.data));
-              download("imjoy_chart_editor_export.json", base64);
+              exportChart("full-json");
             }}
           />
         </SingleSidebarItem>
