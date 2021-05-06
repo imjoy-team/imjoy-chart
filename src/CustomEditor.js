@@ -21,9 +21,9 @@ import {
   StyleTracesPanel,
   StyleColorbarsPanel,
   StyleUpdateMenusPanel,
-  Logo
 } from 'react-chart-editor';
 
+import Logo from 'react-chart-editor/lib/components/widgets/Logo';
 
 export default class CustomEditor extends DefaultEditor {
   render() {

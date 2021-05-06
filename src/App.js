@@ -36,7 +36,6 @@ class App extends Component {
             console.log("imjoy-rpc initialized.")
           },
           run(ctx){
-            debugger
             if(ctx && ctx.config){
               self.state = ctx.config;
             }
@@ -70,7 +69,7 @@ class App extends Component {
           debug
           advancedTraceTypeSelector
         >
-          <CustomEditor />
+          <CustomEditor logoSrc={"./static/icons/favicon-96x96.png"}/>
         </PlotlyEditor>
       </div>
     );
