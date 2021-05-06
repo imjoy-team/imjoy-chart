@@ -6,6 +6,7 @@
   "dependencies": {
     "fsevents": "^2.3.2",
     "imjoy-rpc": "^0.3.7",
+    "papaparse": "^5.3.0",
     "plotly.js": "^1.35.0",
     "react": "^16.2.0",
     "react-chart-editor": "latest",

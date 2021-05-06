@@ -63,9 +63,16 @@ export default class CustomEditor extends DefaultEditor {
           </Info>
         </PlotlyFold>
       </LayoutPanel>
-      <SingleSidebarItem>
-        <Button variant="primary" label="export" onClick={() => alert('save button clicked!')} />
-      </SingleSidebarItem>
+      { this.props.loadCallback && 
+        <SingleSidebarItem>
+          <Button variant="primary" label="load" onClick={this.props.loadCallback} />
+        </SingleSidebarItem>
+      }
+      { this.props.saveCallback && 
+        <SingleSidebarItem>
+          <Button variant="primary" label="save" onClick={this.props.saveCallback} />
+        </SingleSidebarItem>
+      }
     </PanelMenuWrapper>
       
     );
