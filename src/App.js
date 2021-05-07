@@ -64,7 +64,12 @@ function cleanUpPoints(points) {
 class App extends Component {
   constructor() {
     super();
+    this.widgets = [];
     this.plotDivId = randId();
+    this._initPromise = new Promise((resolve) => {
+      this._initPromiseResolve = resolve;
+    });
+
     let load = getUrlParameter("load");
     this.saveDataHandler = null;
     if (load) {
@@ -98,10 +103,11 @@ class App extends Component {
       const self = this;
       imjoyRPC.setupRPC({ name: "ImJoy Chart Editor" }).then((api) => {
         api.export({
-          setup() {
+          async setup() {
             console.log("imjoy-rpc initialized.");
+            await self._initPromise;
           },
-          run(ctx) {
+          async run(ctx) {
             if (ctx && ctx.config) {
               self.saveDataHandler = ctx.config.saveDataHandler;
             }
@@ -114,11 +120,39 @@ class App extends Component {
                   value: name,
                   label: name,
                 }));
-              if (self.state.dataSources) delete self.data.dataSources;
+              if (self.state.dataSources) delete self.state.dataSources;
               if (self.state.dataSourceOptions)
-                delete self.data.dataSourceOptions;
+                delete self.state.dataSourceOptions;
             }
             self.forceUpdate();
+          },
+          setWidgets(widgets) {
+            self.widgets = widgets;
+            self.forceUpdate();
+          },
+          addWidget(widget) {
+            self.widgets.push(widget);
+            self.forceUpdate();
+          },
+          removeWidget() {
+            const w = self.widgets.filter((wd) => wd.name === widget.name)[0];
+            if (w) {
+              // remove widget
+              self.widgets.splice(self.widgets.indexOf(w), 1);
+              self.forceUpdate();
+            } else {
+              throw new Error("Widget not found: " + widget.name);
+            }
+          },
+          updateWidget(widget) {
+            const w = self.widgets.filter((wd) => wd.name === widget.name)[0];
+            if (w) {
+              // replace widget
+              self.widgets[self.widgets.indexOf(w)] = widget;
+              self.forceUpdate();
+            } else {
+              throw new Error("Widget not found: " + widget.name);
+            }
           },
           setState(state) {
             self.setState(state);
@@ -127,20 +161,26 @@ class App extends Component {
           getState() {
             return self.state;
           },
-          on(event, handler) {
-            document.getElementById(this.plotDivId).on(event, (data) => {
-              if (data.points) handler(cleanUpPoints(data.points));
+          addListener({ event, callback }) {
+            document.getElementById(self.plotDivId).on(event, (data) => {
+              if (data.points) callback(cleanUpPoints(data.points));
               else {
-                handler(data);
+                callback(data);
               }
             });
           },
-          off(event) {
-            document.getElementById(this.plotDivId).removeAllListeners(event);
+          removeAllListeners(event) {
+            document.getElementById(self.plotDivId).removeAllListeners(event);
           },
         });
       });
     }
+  }
+
+  componentDidMount() {
+    setTimeout(() => {
+      this._initPromiseResolve();
+    }, 0);
   }
 
   async loadData(file) {
@@ -210,6 +250,7 @@ class App extends Component {
             dataSources={this.dataSources}
             divId={this.plotDivId}
             data={this.state}
+            widgets={this.widgets}
             handleSaveData={this.saveDataHandler}
             handleLoadData={this.loadData.bind(this)}
           />

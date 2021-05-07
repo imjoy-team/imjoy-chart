@@ -1,5 +1,7 @@
 import React from "react";
 import plotly from "plotly.js/dist/plotly";
+import Form from "@rjsf/core";
+
 import {
   PlotlyFold,
   PanelMenuWrapper,
@@ -30,7 +32,7 @@ import DropdownWidget from "react-chart-editor/lib/components/widgets/Dropdown";
 import TextInput from "react-chart-editor/lib/components/widgets/TextInput";
 
 function download(filename, base64) {
-  var element = document.createElement("a");
+  const element = document.createElement("a");
   element.setAttribute("href", base64);
   element.setAttribute("download", filename);
 
@@ -65,6 +67,50 @@ export default class CustomEditor extends DefaultEditor {
         );
       }
     }
+
+    const widgets = [];
+    if (this.props.widgets) {
+      for (let widget of this.props.widgets) {
+        if (widget.type === "form") {
+          widgets.push(
+            <PlotlyFold name={widget.name} key={widget.name}>
+              <div style={{ padding: "10px" }}>
+                <Form
+                  schema={widget.schema}
+                  onChange={(e) => {
+                    widget.onChange && widget.onChange.apply(null, [e]);
+                  }}
+                  onSubmit={(e) => {
+                    widget.onSubmit && widget.onSubmit.apply(null, [e]);
+                  }}
+                  onError={(e) => {
+                    widget.onError && widget.onError.apply(null, [e]);
+                  }}
+                />
+              </div>
+            </PlotlyFold>
+          );
+        } else if (widget.type === "image") {
+          widgets.push(
+            <PlotlyFold name={widget.name} key={widget.name}>
+              <img
+                style={{ width: "100%", objectFit: "cover" }}
+                src={widget.src}
+              ></img>
+            </PlotlyFold>
+          );
+        } else if (widget.type === "html") {
+          widgets.push(
+            <PlotlyFold name={widget.name} key={widget.name}>
+              <div style={{ padding: "10px" }}>
+                <div dangerouslySetInnerHTML={{ __html: widget.body }} />
+              </div>
+            </PlotlyFold>
+          );
+        }
+      }
+    }
+
     const exportChart = async (format) => {
       format = format || this.exportFormat;
       const base64 = await plotly.toImage(this.props.divId, {
@@ -112,17 +158,7 @@ export default class CustomEditor extends DefaultEditor {
 
         {/* ---custom widgets-- */}
         <LayoutPanel group={_("Annotate")} name={_("Info")}>
-          <PlotlyFold name="PlotlyFold">
-            <Info attr="title">
-              <p>
-                This custom editor demonstrates the general-purpose container
-                and field components.
-              </p>
-              <p>
-                This is an <code>Info</code> component.
-              </p>
-            </Info>
-          </PlotlyFold>
+          {widgets}
         </LayoutPanel>
         <LayoutPanel group={_("Export")} name="image">
           <PlotlyFold>
