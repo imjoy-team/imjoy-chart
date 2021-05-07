@@ -126,6 +126,9 @@ class App extends Component {
             }
             self.forceUpdate();
           },
+          async loadDataSource(file){
+            await this.loadData(file);
+          },
           setWidgets(widgets) {
             self.widgets = widgets;
             self.forceUpdate();
