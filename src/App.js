@@ -50,9 +50,21 @@ function getUrlParameter(name) {
     : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
+function cleanUpPoints(points) {
+  const data = [];
+  for (let i = 0; i < points.length; i++) {
+    data.push({
+      x: points[i].x,
+      y: points[i].y,
+      z: points[i].z || undefined,
+    });
+  }
+  return data;
+}
 class App extends Component {
   constructor() {
     super();
+    this.plotDivId = randId();
     let load = getUrlParameter("load");
     this.saveDataHandler = null;
     if (load) {
@@ -115,6 +127,17 @@ class App extends Component {
           getState() {
             return self.state;
           },
+          on(event, handler) {
+            document.getElementById(this.plotDivId).on(event, (data) => {
+              if (data.points) handler(cleanUpPoints(data.points));
+              else {
+                handler(data);
+              }
+            });
+          },
+          off(event) {
+            document.getElementById(this.plotDivId).removeAllListeners(event);
+          },
         });
       });
     }
@@ -162,7 +185,6 @@ class App extends Component {
   }
 
   render() {
-    const plotDivId = randId();
     return (
       <div className="app">
         <PlotlyEditor
@@ -173,20 +195,20 @@ class App extends Component {
           dataSources={this.dataSources}
           dataSourceOptions={this.dataSourceOptions}
           plotly={plotly}
-          onUpdate={(data, layout, frames) =>
-            this.setState({ data, layout, frames })
-          }
+          onUpdate={(data, layout, frames) => {
+            this.setState({ data, layout, frames });
+          }}
           useResizeHandler
           debug
           glByDefault
           showFieldTooltips
           advancedTraceTypeSelector
-          divId={plotDivId}
+          divId={this.plotDivId}
         >
           <CustomEditor
             logoSrc={"./static/icons/favicon-96x96.png"}
             dataSources={this.dataSources}
-            divId={plotDivId}
+            divId={this.plotDivId}
             data={this.state}
             handleSaveData={this.saveDataHandler}
             handleLoadData={this.loadData.bind(this)}
