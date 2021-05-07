@@ -157,7 +157,7 @@ export default class CustomEditor extends DefaultEditor {
         {this.props.children ? this.props.children : null}
 
         {/* ---custom widgets-- */}
-        <LayoutPanel group={_("Annotate")} name={_("Info")}>
+        <LayoutPanel group={_("Info")} name={_("Info")}>
           {widgets}
         </LayoutPanel>
         <LayoutPanel group={_("Export")} name="image">

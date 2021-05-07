@@ -50,13 +50,19 @@ function getUrlParameter(name) {
     : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-function cleanUpPoints(points) {
+function cleanUpPoints(dataSources, points) {
   const data = [];
   for (let i = 0; i < points.length; i++) {
+    const customdata = {};
+    for (let k of Object.keys(dataSources)) {
+      customdata[k] = dataSources[k][points[i].pointIndex];
+    }
     data.push({
+      pointIndex: points[i].pointIndex,
       x: points[i].x,
       y: points[i].y,
       z: points[i].z || undefined,
+      customdata: customdata,
     });
   }
   return data;
@@ -126,7 +132,7 @@ class App extends Component {
             }
             self.forceUpdate();
           },
-          async loadDataSource(file){
+          async loadDataSource(file) {
             await self.loadData(file);
           },
           setWidgets(widgets) {
@@ -166,7 +172,8 @@ class App extends Component {
           },
           addListener({ event, callback }) {
             document.getElementById(self.plotDivId).on(event, (data) => {
-              if (data.points) callback(cleanUpPoints(data.points));
+              if (data.points)
+                callback(cleanUpPoints(self.dataSources, data.points));
               else {
                 callback(data);
               }
