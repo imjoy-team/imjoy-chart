@@ -93,10 +93,12 @@ export default class CustomEditor extends DefaultEditor {
         } else if (widget.type === "image") {
           widgets.push(
             <PlotlyFold name={widget.name} key={widget.name}>
-              <img
-                style={{ width: "100%", objectFit: "cover" }}
-                src={widget.src}
-              ></img>
+              {widget.src && (
+                <img
+                  style={{ width: "100%", objectFit: "cover" }}
+                  src={widget.src}
+                ></img>
+              )}
             </PlotlyFold>
           );
         } else if (widget.type === "html") {
