@@ -257,7 +257,7 @@ export default class CustomEditor extends DefaultEditor {
             label="save"
             onClick={async () => {
               if (this.props.handleSaveData)
-                this.props.handleLoadData(this.props.data);
+                this.props.handleSaveData(this.props.data);
               else exportChart("full-json");
             }}
           />

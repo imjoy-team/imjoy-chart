@@ -92,6 +92,7 @@ class App extends Component {
     let load = getUrlParameter("load");
     this.hideControls = !!getUrlParameter("hideControls");
     this.saveDataHandler = null;
+    this.loadDataHandler = null;
     if (load) {
       this.loadData(load);
     } else {
@@ -147,7 +148,10 @@ class App extends Component {
           },
           async run(ctx) {
             if (ctx && ctx.config) {
-              self.saveDataHandler = ctx.config.saveDataHandler;
+              if (ctx.config.saveDataHandler !== undefined)
+                self.saveDataHandler = ctx.config.saveDataHandler;
+              if (ctx.config.loadDataHandler !== undefined)
+                self.loadDataHandler = ctx.config.loadDataHandler;
               if (ctx.config.hideControls !== undefined)
                 self.hideControls = ctx.config.hideControls;
             }
@@ -307,7 +311,7 @@ class App extends Component {
             data={this.state}
             widgets={this.widgets}
             handleSaveData={this.saveDataHandler}
-            handleLoadData={this.loadData.bind(this)}
+            handleLoadData={this.loadDataHandler || this.loadData.bind(this)}
           />
         </PlotlyEditor>
       </div>
