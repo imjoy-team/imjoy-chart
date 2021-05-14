@@ -89,8 +89,8 @@ class App extends Component {
     this._initPromise = new Promise((resolve) => {
       this._initPromiseResolve = resolve;
     });
-
     let load = getUrlParameter("load");
+    this.hideControls = !!getUrlParameter("hideControls");
     this.saveDataHandler = null;
     if (load) {
       loadCSV(load).then((data) => {
@@ -155,6 +155,7 @@ class App extends Component {
           async run(ctx) {
             if (ctx && ctx.config) {
               self.saveDataHandler = ctx.config.saveDataHandler;
+              self.hideControls = ctx.config.hideControls;
             }
             if (ctx && ctx.data) {
               self.setState(ctx.data);
@@ -173,6 +174,10 @@ class App extends Component {
           },
           async loadDataSource(file) {
             await self.loadData(file);
+          },
+          hideControls(hide) {
+            self.hideControls = hide;
+            self.forceUpdate();
           },
           setWidgets(widgets) {
             self.widgets = widgets;
@@ -282,6 +287,7 @@ class App extends Component {
     return (
       <div className="app">
         <PlotlyEditor
+          hideControls={this.hideControls}
           data={this.state.data}
           layout={this.state.layout}
           config={config}
