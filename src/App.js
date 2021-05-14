@@ -158,7 +158,6 @@ class App extends Component {
               self.hideControls = ctx.config.hideControls;
             }
             if (ctx && ctx.data) {
-              self.setState(ctx.data);
               self.dataSources = ctx.data.dataSources || {};
               self.dataSourceOptions =
                 ctx.data.dataSourceOptions ||
@@ -169,6 +168,7 @@ class App extends Component {
               if (self.state.dataSources) delete self.state.dataSources;
               if (self.state.dataSourceOptions)
                 delete self.state.dataSourceOptions;
+              self.setState(ctx.data);
             }
             self.forceUpdate();
           },
