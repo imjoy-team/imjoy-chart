@@ -93,14 +93,7 @@ class App extends Component {
     this.hideControls = !!getUrlParameter("hideControls");
     this.saveDataHandler = null;
     if (load) {
-      loadCSV(load).then((data) => {
-        this.dataSources = data;
-        this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
-          value: name,
-          label: name,
-        }));
-        this.forceUpdate();
-      });
+      this.loadData(load);
     } else {
       this.dataSources = {
         col1: [1, 2, 3], // eslint-disable-line no-magic-numbers
@@ -155,7 +148,8 @@ class App extends Component {
           async run(ctx) {
             if (ctx && ctx.config) {
               self.saveDataHandler = ctx.config.saveDataHandler;
-              self.hideControls = ctx.config.hideControls;
+              if (ctx.config.hideControls !== undefined)
+                self.hideControls = ctx.config.hideControls;
             }
             if (ctx && ctx.data) {
               self.dataSources = ctx.data.dataSources || {};
@@ -249,6 +243,7 @@ class App extends Component {
           if (data.data && data.layout) {
             this.setState(data);
             this.forceUpdate();
+            return;
           } else {
             throw new Error("Invalid file type");
           }
