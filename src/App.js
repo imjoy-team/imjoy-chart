@@ -12,7 +12,7 @@ const config = { editable: true };
 function loadCSV(url) {
   return new Promise((resolve, reject) => {
     Papa.parse(url, {
-      download: url.startsWith("http"),
+      download: typeof url === "string" && url.startsWith("http"),
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -237,7 +237,9 @@ class App extends Component {
 
   async loadData(file) {
     let data;
-    if (typeof file === "object") {
+    if (file instanceof Blob) {
+      data = await loadCSV(file);
+    } else if (typeof file === "object") {
       data = file;
     } else {
       if (typeof file === "string" && file.startsWith("http")) {
