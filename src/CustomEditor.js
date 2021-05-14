@@ -77,6 +77,7 @@ export default class CustomEditor extends DefaultEditor {
               <div style={{ padding: "10px" }}>
                 <Form
                   schema={widget.schema}
+                  uiSchema={widget.uiSchema}
                   onChange={(e) => {
                     widget.onChange && widget.onChange.apply(null, [e]);
                   }}

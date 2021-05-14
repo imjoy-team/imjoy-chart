@@ -5,13 +5,14 @@ import CustomEditor from "./CustomEditor";
 import "react-chart-editor/lib/react-chart-editor.css";
 import { imjoyRPC } from "imjoy-rpc";
 import * as Papa from "papaparse";
+import { Uint64LE, Int64LE } from "int64-buffer";
 
 const config = { editable: true };
 
 function loadCSV(url) {
   return new Promise((resolve, reject) => {
     Papa.parse(url, {
-      download: true,
+      download: url.startsWith("http"),
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -67,6 +68,19 @@ function cleanUpPoints(dataSources, points) {
   }
   return data;
 }
+
+const dtypeToTypedArray = {
+  int8: Int8Array,
+  int16: Int16Array,
+  int32: Int32Array,
+  uint8: Uint8Array,
+  uint16: Uint16Array,
+  uint32: Uint32Array,
+  float32: Float32Array,
+  float64: Float64Array,
+  array: Array,
+};
+
 class App extends Component {
   constructor() {
     super();
@@ -108,6 +122,31 @@ class App extends Component {
     if (window.self !== window.top) {
       const self = this;
       imjoyRPC.setupRPC({ name: "ImJoy Chart Editor" }).then((api) => {
+        api.registerCodec({
+          name: "ndarray",
+          decoder(obj) {
+            if (obj._rdtype === "int64") {
+              const ret = new Uint32Array(
+                new ArrayBuffer(obj._rvalue.byteLength / 2)
+              );
+              for (let i = 0; i < obj._rvalue.byteLength; i += 8) {
+                ret[i / 8] = new Int64LE(obj._rvalue, i).toNumber();
+              }
+              return ret;
+            }
+            if (obj._rdtype === "uint64") {
+              const ret = new Uint32Array(
+                new ArrayBuffer(obj._rvalue.byteLength / 2)
+              );
+              for (let i = 0; i < obj._rvalue.byteLength; i += 8) {
+                ret[i / 8] = new Uint64LE(obj._rvalue, i).toNumber();
+              }
+              return ret;
+            }
+            const arrayType = dtypeToTypedArray[obj._rdtype];
+            return new arrayType(obj._rvalue);
+          },
+        });
         api.export({
           async setup() {
             console.log("imjoy-rpc initialized.");
@@ -194,38 +233,43 @@ class App extends Component {
   }
 
   async loadData(file) {
-    if (typeof file === "string") {
-      if (file.split("?")[0].endsWith(".json")) {
-        const response = await fetch(file);
-        const data = await response.json();
-        if (data.data && data.layout) {
-          this.setState(data);
-          this.forceUpdate();
-        } else {
-          throw new Error("Invalid file type");
-        }
-      } else if (!file.split("?")[0].endsWith(".csv")) {
-        throw new Error(
-          "Invalid file extension, only .json and .csv are supported"
-        );
-      }
-    } else if (file instanceof Blob) {
-      if (file.name.endsWith(".json")) {
-        const fr = new FileReader();
-        fr.addEventListener("load", (e) => {
-          const data = JSON.parse(fr.result);
+    let data;
+    if (typeof file === "object") {
+      data = file;
+    } else {
+      if (typeof file === "string" && file.startsWith("http")) {
+        if (file.split("?")[0].endsWith(".json")) {
+          const response = await fetch(file);
+          const data = await response.json();
           if (data.data && data.layout) {
             this.setState(data);
             this.forceUpdate();
           } else {
             throw new Error("Invalid file type");
           }
-        });
+        } else if (!file.split("?")[0].endsWith(".csv")) {
+          throw new Error(
+            "Invalid file extension, only .json and .csv are supported"
+          );
+        }
+      } else if (file instanceof Blob) {
+        if (file.name.endsWith(".json")) {
+          const fr = new FileReader();
+          fr.addEventListener("load", (e) => {
+            const data = JSON.parse(fr.result);
+            if (data.data && data.layout) {
+              this.setState(data);
+              this.forceUpdate();
+            } else {
+              throw new Error("Invalid file type");
+            }
+          });
 
-        fr.readAsText(file);
+          fr.readAsText(file);
+        }
       }
+      data = await loadCSV(file);
     }
-    const data = await loadCSV(file);
     this.dataSources = data;
     this.dataSourceOptions = Object.keys(this.dataSources).map((name) => ({
       value: name,
